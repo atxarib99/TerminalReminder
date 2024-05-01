@@ -1,0 +1,52 @@
+#check if day/time were provided
+if [ $1 = "help" ]
+then
+	echo "usage: remindme \"Reminder_Name\" [today|tomorrow|mm/dd/yyyy [hh:mm:ss]]"
+	exit 1
+fi
+if [ $# -gt 1 ]
+then
+	#if just given today
+	if [ $2 = "today" ] && [ $# = 2 ]
+	then
+		#add todays date and time
+        	nowDate=$(date +"%m/%d/%Y %T")
+	elif [ $2 = "today" ] && [ $# = 3 ]
+	then
+		#if today and time given add today and time given
+		nowDate=$(date +"%m/%d/%Y ")
+		nowDate+=$3
+	elif [ $2 = "tomorrow" ] && [ $# = 3 ]
+	then
+		#if tomorrow and time given, calculate tomorrows day and add time given
+		nowDate=$(date -r $(expr $(date +%s) + 86400) +"%m/%d/%Y ")
+		nowDate+=$3
+	elif [ $2 = "tomorrow" ] && [ $# = 2 ]
+	then
+		#if just tomorrow given, calculate tomorrows date and add current time (24 hours from now)
+		nowDate=$(date -r $(expr $(date +%s) + 86400) +"%m/%d/%Y %T")
+	else
+		#else add day and time
+	        nowDate=$2
+		nowDate+=" "
+		nowDate+=$3
+	fi
+else
+	#else dont have a time or day
+	nowDate=""
+fi
+#split on space and calculate day and time
+day=$(echo $nowDate | cut -f1 -d ' ')
+time=$(echo $nowDate | cut -f2 -d ' ')
+
+echo $day
+echo $time
+
+osascript - "$1" "$day" "$time" <<END
+on run argv                                                               
+    set stringedAll to date (item 2 of argv & " " & item 3 of argv)
+    tell application "Reminders"                                                                                                  
+        make new reminder with properties {name:item 1 of argv, due date:stringedAll}                                             
+    end tell                                                                                                                      
+end run                                                                                                                           
+END
