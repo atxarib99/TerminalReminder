@@ -1,3 +1,12 @@
+#!/bin/bash
+
+#spit usage on no args
+if [ $# -lt 1 ]
+then
+	echo "usage: remindme \"Reminder_Name\" [today|tomorrow|mm/dd/yyyy [hh:mm:ss]]"
+	exit 1
+fi
+
 #check if day/time were provided
 if [ $1 = "help" ]
 then
